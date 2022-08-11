@@ -45,7 +45,7 @@ func (g Game) GameLoop() (func(), error) {
 		sdl.WINDOWPOS_UNDEFINED,
 		g.Width,
 		g.Height,
-		sdl.WINDOW_SHOWN,
+		sdl.WINDOW_RESIZABLE,
 	)
 	if err != nil {
 		return destroyFunc, err
@@ -64,6 +64,12 @@ func (g Game) GameLoop() (func(), error) {
 			case *sdl.QuitEvent:
 				running = false
 				break
+			case *sdl.WindowEvent:
+				if t.Event == sdl.WINDOWEVENT_RESIZED {
+					g.Width = t.Data1 - 1
+					g.Height = t.Data2
+					g.Resolution = int(g.Width)
+				}
 			case *sdl.KeyboardEvent:
 				if t.Repeat > 0 {
 					break

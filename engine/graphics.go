@@ -38,27 +38,39 @@ func Draw(g *Game, renderer *sdl.Renderer) {
 
 		// Render the ceiling
 		ceil := sdl.Rect{
-			X: int32(a * int(barWidth)),
+			X: int32(float64(a) * barWidth),
 			Y: 0,
 			W: int32(barWidth),
 			H: ceilHeight + 1,
 		}
-		renderer.SetDrawColor(100, 150, 132, 255)
+		renderer.SetDrawColor(0, 0, 0, 255)
 		renderer.FillRect(&ceil)
 
 		// Render the wall
+		scaledHeight := wallHeight * int32(g.State.Map.WallHeight)
+		if scaledHeight > g.Height-wallOffset {
+			scaledHeight = g.Height - wallOffset
+		}
 		wall := sdl.Rect{
 			X: int32(a * int(barWidth)),
-			Y: int32(wallOffset),
+			Y: int32(g.Height - scaledHeight - wallOffset),
 			W: int32(barWidth),
-			H: wallHeight + 1,
+			H: scaledHeight + 1,
 		}
 
-		if ray.VerticalHit {
-			renderer.SetDrawColor(120, 120, 120, 255)
-		} else {
-			renderer.SetDrawColor(150, 150, 150, 255)
+		shade := float64(g.Scale) / ray.Length * 2
+		if shade < 0.6 {
+			shade = 0.6
+		} else if shade > 1 {
+			shade = 1
 		}
+		if ray.VerticalHit {
+			shade -= 0.1
+		}
+		var r, g, b uint8 = 93, 138, 168
+
+		r, g, b = uint8(float64(r)*shade), uint8(float64(g)*shade), uint8(float64(b)*shade)
+		renderer.SetDrawColor(r, g, b, 255)
 		renderer.FillRect(&wall)
 
 		// Render the floor
@@ -68,7 +80,7 @@ func Draw(g *Game, renderer *sdl.Renderer) {
 			W: int32(barWidth),
 			H: floorHeight,
 		}
-		renderer.SetDrawColor(100, 50, 132, 255)
+		renderer.SetDrawColor(77, 38, 0, 255)
 		renderer.FillRect(&floor)
 
 	}

@@ -7,9 +7,10 @@ import (
 type Tile int
 
 type Map struct {
-	Width int
-	Tiles []Tile
-	Start Position
+	Width      int
+	WallHeight int
+	Tiles      []Tile
+	Start      Position
 }
 
 type Position struct {
