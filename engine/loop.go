@@ -22,6 +22,7 @@ type Game struct {
 type GameInputs struct {
 	W, A, S, D            bool
 	UP, DOWN, LEFT, RIGHT bool
+	SHIFT, ALT            bool
 }
 
 func (g Game) GameLoop() (func(), error) {
@@ -84,6 +85,10 @@ func (g Game) GameLoop() (func(), error) {
 					g.Inputs.DOWN = (t.State == sdl.PRESSED)
 				case 1073741903:
 					g.Inputs.RIGHT = (t.State == sdl.PRESSED)
+				case 1073742049:
+					g.Inputs.SHIFT = (t.State == sdl.PRESSED)
+				case 1073742050:
+					g.Inputs.ALT = (t.State == sdl.PRESSED)
 				}
 			}
 		}

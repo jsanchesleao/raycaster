@@ -24,6 +24,9 @@ func Draw(g *Game, renderer *sdl.Renderer) {
 			angleOffset -= 2 * math.Pi
 		}
 		adjustedLength := ray.Length * math.Cos(angleOffset)
+		if int32(adjustedLength) <= 0 {
+			continue
+		}
 
 		wallHeight := int32(g.Scale) * g.Height / int32(adjustedLength)
 		wallOffset := g.Height/2 - wallHeight/2
