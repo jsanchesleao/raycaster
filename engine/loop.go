@@ -12,6 +12,7 @@ type Game struct {
 	Width, Height int32
 	WindowTitle   string
 	Scale         int
+	Resolution    int
 	Update        func(*Game)
 	Render        func(*Game, *sdl.Renderer)
 	Inputs        GameInputs

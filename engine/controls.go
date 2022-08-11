@@ -33,13 +33,13 @@ func MovePlayer(g *Game) {
 			state.PlayerPosition.Y += float64(g.Scale) * baseSpeed * dy
 		}
 	}
-	if g.Inputs.D || g.Inputs.RIGHT {
+	if g.Inputs.A || g.Inputs.LEFT {
 		state.PlayerAngle -= baseAngleSpeed * (math.Pi / 180)
 		if state.PlayerAngle < 0 {
 			state.PlayerAngle += 2 * math.Pi
 		}
 	}
-	if g.Inputs.A || g.Inputs.LEFT {
+	if g.Inputs.D || g.Inputs.RIGHT {
 		state.PlayerAngle += baseAngleSpeed * (math.Pi / 180)
 		if state.PlayerAngle > (2 * math.Pi) {
 			state.PlayerAngle -= 2 * math.Pi

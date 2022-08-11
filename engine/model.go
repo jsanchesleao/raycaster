@@ -23,11 +23,12 @@ type GameState struct {
 }
 
 type Ray struct {
-	Origin Position
-	Angle  Angle
-	Length float64
-	X, Y   float64
-	Detect Tile // tile it detected
+	Origin      Position
+	Angle       Angle
+	Length      float64
+	X, Y        float64
+	VerticalHit bool
+	Detect      Tile // tile it detected
 }
 
 type Angle = float64

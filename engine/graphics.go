@@ -9,54 +9,39 @@ import (
 func Draw(g *Game, renderer *sdl.Renderer) {
 
 	state := &g.State
-	// draw grid
-	for index, tile := range state.Map.Tiles {
-
-		x := (index % state.Map.Width) * g.Scale
-		y := (index / state.Map.Width) * g.Scale
-
-		if tile == 0 {
-			renderer.SetDrawColor(255, 255, 255, 255)
-		} else {
-			renderer.SetDrawColor(255, 0, 0, 255)
-		}
-		tileRect := sdl.Rect{X: int32(x) + 1, Y: int32(y) + 1, W: int32(g.Scale - 2), H: int32(g.Scale - 2)}
-		renderer.FillRect(&tileRect)
-	}
-
-	//render rays
+	//render raycast
 	pov := 60
-	res := 120
-	angleStep := Radians(pov) / float64(res)
+	angleStep := Radians(pov) / float64(g.Resolution)
+	barWidth := float64(g.Width) / float64(g.Resolution)
 	firstAngle := state.PlayerAngle - Radians(pov/2)
-	renderer.SetDrawColor(150, 150, 150, 255)
-	for a := 0; a < res; a++ {
+	for a := 0; a < g.Resolution; a++ {
 		ray := getRay(state.PlayerPosition.X, state.PlayerPosition.Y, firstAngle+float64(a)*angleStep, g.Scale, g.State.Map)
-		renderer.DrawLine(
-			int32(state.PlayerPosition.X),
-			int32(state.PlayerPosition.Y),
-			int32(ray.X),
-			int32(ray.Y),
-		)
+
+		angleOffset := g.State.PlayerAngle - ray.Angle
+		if angleOffset < 0 {
+			angleOffset += math.Pi * 2
+		} else if angleOffset > 2*math.Pi {
+			angleOffset -= 2 * math.Pi
+		}
+		adjustedLength := ray.Length * math.Cos(angleOffset)
+
+		wallHeight := int32(g.Scale) * g.Height / int32(adjustedLength)
+		wallOffset := g.Height/2 - wallHeight/2
+
+		wall := sdl.Rect{
+			X: int32(a * int(barWidth)),
+			Y: int32(wallOffset),
+			W: int32(barWidth),
+			H: wallHeight,
+		}
+
+		if ray.VerticalHit {
+			renderer.SetDrawColor(120, 120, 120, 255)
+		} else {
+			renderer.SetDrawColor(150, 150, 150, 255)
+		}
+		renderer.FillRect(&wall)
 	}
-
-	//draw player
-	renderer.SetDrawColor(0, 255, 0, 255)
-	renderer.FillRect(&sdl.Rect{
-		X: int32(state.PlayerPosition.X) - 3,
-		Y: int32(state.PlayerPosition.Y) - 3,
-		W: 6,
-		H: 6,
-	})
-
-	dx := 10 * math.Cos(float64(state.PlayerAngle))
-	dy := 10 * math.Sin(float64(state.PlayerAngle)) * -1
-	renderer.DrawLine(
-		int32(state.PlayerPosition.X),
-		int32(state.PlayerPosition.Y),
-		int32(state.PlayerPosition.X+dx),
-		int32(state.PlayerPosition.Y+dy),
-	)
 
 }
 
@@ -79,26 +64,8 @@ func getRay(rx float64, ry float64, angle float64, scale int, m *Map) Ray {
 
 	cos := math.Cos(angle)
 	sin := math.Sin(angle)
-	var tan float64
-	var aTan float64
-	if cos > 0 && cos < 0.001 {
-		tan = sin / 0.001
-	} else if cos < 0 && cos > -0.001 {
-		tan = sin / -0.001
-	} else if cos == 0 {
-		tan = 10
-	} else {
-		tan = sin / cos
-	}
-	if sin > 0 && sin < 0.001 {
-		aTan = cos / 0.001
-	} else if sin < 0 && sin > -0.001 {
-		aTan = cos / -0.001
-	} else if sin == 0 {
-		aTan = 10
-	} else {
-		aTan = cos / sin
-	}
+	tan := Tan(angle)
+	aTan := ATan(angle)
 
 	if cos > 0 {
 		hx = float64(int(rx/float64(scale))*scale) + float64(scale)
@@ -139,6 +106,7 @@ func getRay(rx float64, ry float64, angle float64, scale int, m *Map) Ray {
 				ray.Detect = tile
 				ray.X = vx
 				ray.Y = vy
+				ray.VerticalHit = true
 				dof = maxDof
 			} else {
 				vx += deltaVx
@@ -151,6 +119,7 @@ func getRay(rx float64, ry float64, angle float64, scale int, m *Map) Ray {
 				ray.Detect = tile
 				ray.X = hx
 				ray.Y = hy
+				ray.VerticalHit = false
 				dof = maxDof
 			} else {
 				hx += deltaHx
