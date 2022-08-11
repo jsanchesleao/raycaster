@@ -39,7 +39,7 @@ func main() {
 	game := engine.Game{
 		Width:       800,
 		Height:      600,
-		Scale:       64,
+		Scale:       50,
 		WindowTitle: "rays",
 		State:       gameState,
 		Update: func(g *engine.Game) {
